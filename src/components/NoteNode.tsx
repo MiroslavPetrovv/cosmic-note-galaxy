@@ -1,14 +1,19 @@
 import React, { useState, useCallback, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Edit3, Link, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NoteData {
   title: string;
   content: string;
   theme: 'royal' | 'cosmic' | 'stellar' | 'nebula';
+  onEdit?: (noteId: string) => void;
+  onLink?: (noteId: string) => void;
+  onRead?: (noteId: string) => void;
 }
 
 const themeStyles = {
@@ -20,6 +25,7 @@ const themeStyles = {
 
 export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const noteData = data as unknown as NoteData;
   const [title, setTitle] = useState(noteData.title);
   const [content, setContent] = useState(noteData.content);
@@ -45,12 +51,14 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
   return (
     <Card 
       className={cn(
-        'w-64 min-h-32 p-4 transition-all duration-300 cursor-pointer hover:scale-105',
+        'w-64 min-h-32 p-4 transition-all duration-300 cursor-pointer hover:scale-105 relative group',
         themeStyles[noteData.theme],
         selected && 'ring-2 ring-primary ring-offset-2',
         'backdrop-blur-sm'
       )}
       onDoubleClick={handleDoubleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Handle
         type="target"
@@ -75,6 +83,45 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
         position={Position.Right}
         className="w-3 h-3 !bg-galaxy-node-border border-2 border-galaxy-bg opacity-70 hover:opacity-100 transition-opacity"
       />
+
+      {/* Action Buttons */}
+      {(isHovered || isEditing) && !isEditing && (
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 bg-card/80 hover:bg-accent"
+            onClick={(e) => {
+              e.stopPropagation();
+              noteData.onRead?.(id);
+            }}
+          >
+            <Eye className="h-3 w-3" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 bg-card/80 hover:bg-accent"
+            onClick={(e) => {
+              e.stopPropagation();
+              noteData.onEdit?.(id);
+            }}
+          >
+            <Edit3 className="h-3 w-3" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 bg-card/80 hover:bg-accent"
+            onClick={(e) => {
+              e.stopPropagation();
+              noteData.onLink?.(id);
+            }}
+          >
+            <Link className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
 
       <div className="space-y-3">
         {isEditing ? (

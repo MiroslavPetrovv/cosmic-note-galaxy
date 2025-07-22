@@ -11,50 +11,166 @@ import {
   Node,
   ConnectionMode,
   Panel,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { NoteNode } from './NoteNode';
+import { GalaxyNode } from './GalaxyNode';
 import { ThemeToggle } from './ThemeToggle';
 import { Toolbar } from './Toolbar';
+import { EditSidebar } from './EditSidebar';
+import { ReadSidebar } from './ReadSidebar';
+import { SearchBar } from './SearchBar';
 import { useToast } from '@/hooks/use-toast';
 
 const nodeTypes = {
   note: NoteNode,
+  galaxy: GalaxyNode,
 };
 
-const initialNodes: Node[] = [
+// Galaxy view nodes
+const initialGalaxies: Node[] = [
   {
-    id: '1',
-    type: 'note',
-    position: { x: 250, y: 250 },
+    id: 'galaxy-js',
+    type: 'galaxy',
+    position: { x: 200, y: 200 },
     data: { 
-      title: 'Welcome to Galaxy Mind',
-      content: 'This is your first note. Double-click to edit, drag to move, and connect to other notes.',
+      name: 'JavaScript',
+      noteCount: 3,
       theme: 'royal'
     },
   },
   {
-    id: '2',
-    type: 'note',
-    position: { x: 550, y: 100 },
+    id: 'galaxy-design',
+    type: 'galaxy',
+    position: { x: 500, y: 100 },
     data: { 
-      title: 'Ideas',
-      content: 'Collect your thoughts and ideas here. Link them together to see connections.',
+      name: 'Design',
+      noteCount: 2,
       theme: 'cosmic'
     },
   },
   {
-    id: '3',
-    type: 'note',
-    position: { x: 100, y: 400 },
+    id: 'galaxy-projects',
+    type: 'galaxy',
+    position: { x: 300, y: 400 },
     data: { 
-      title: 'Projects',
-      content: 'Track your projects and their relationships.',
+      name: 'Projects',
+      noteCount: 4,
       theme: 'stellar'
     },
   },
 ];
+
+// Notes for each galaxy
+const galaxyNotes = {
+  'galaxy-js': [
+    {
+      id: 'js-1',
+      type: 'note',
+      position: { x: 250, y: 150 },
+      data: { 
+        title: 'React Hooks',
+        content: 'useState, useEffect, useCallback - the essential hooks for modern React development.',
+        theme: 'royal',
+        galaxy: 'JavaScript'
+      },
+    },
+    {
+      id: 'js-2',
+      type: 'note',
+      position: { x: 550, y: 200 },
+      data: { 
+        title: 'Async/Await',
+        content: 'Modern way to handle asynchronous operations in JavaScript.',
+        theme: 'royal',
+        galaxy: 'JavaScript'
+      },
+    },
+    {
+      id: 'js-3',
+      type: 'note',
+      position: { x: 100, y: 350 },
+      data: { 
+        title: 'ES6 Features',
+        content: 'Arrow functions, destructuring, template literals, and more.',
+        theme: 'royal',
+        galaxy: 'JavaScript'
+      },
+    },
+  ],
+  'galaxy-design': [
+    {
+      id: 'design-1',
+      type: 'note',
+      position: { x: 200, y: 200 },
+      data: { 
+        title: 'Color Theory',
+        content: 'Understanding color harmony and psychology in design.',
+        theme: 'cosmic',
+        galaxy: 'Design'
+      },
+    },
+    {
+      id: 'design-2',
+      type: 'note',
+      position: { x: 450, y: 300 },
+      data: { 
+        title: 'Typography',
+        content: 'The art of arranging type to make written language legible and appealing.',
+        theme: 'cosmic',
+        galaxy: 'Design'
+      },
+    },
+  ],
+  'galaxy-projects': [
+    {
+      id: 'proj-1',
+      type: 'note',
+      position: { x: 300, y: 150 },
+      data: { 
+        title: 'Mind Map App',
+        content: 'Building a galaxy-themed mind mapping application.',
+        theme: 'stellar',
+        galaxy: 'Projects'
+      },
+    },
+    {
+      id: 'proj-2',
+      type: 'note',
+      position: { x: 150, y: 300 },
+      data: { 
+        title: 'Portfolio Website',
+        content: 'Creating a personal portfolio to showcase work.',
+        theme: 'stellar',
+        galaxy: 'Projects'
+      },
+    },
+    {
+      id: 'proj-3',
+      type: 'note',
+      position: { x: 500, y: 250 },
+      data: { 
+        title: 'Learning Goals',
+        content: 'Track progress on learning new technologies.',
+        theme: 'stellar',
+        galaxy: 'Projects'
+      },
+    },
+    {
+      id: 'proj-4',
+      type: 'note',
+      position: { x: 350, y: 400 },
+      data: { 
+        title: 'Team Collaboration',
+        content: 'Best practices for working with development teams.',
+        theme: 'stellar',
+        galaxy: 'Projects'
+      },
+    },
+  ],
+};
 
 const initialEdges: Edge[] = [
   {
@@ -68,11 +184,67 @@ const initialEdges: Edge[] = [
 ];
 
 export const MindMap = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [viewMode, setViewMode] = useState<'galaxies' | 'notes'>('galaxies');
+  const [currentGalaxy, setCurrentGalaxy] = useState<string | null>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialGalaxies);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const nodeIdRef = useRef(4);
+  const [isEditSidebarOpen, setIsEditSidebarOpen] = useState(false);
+  const [isReadSidebarOpen, setIsReadSidebarOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<any>(null);
+  const [readingNote, setReadingNote] = useState<any>(null);
+  const [linkingMode, setLinkingMode] = useState(false);
+  const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
+  const nodeIdRef = useRef(100);
   const { toast } = useToast();
+
+  // Enhanced node data with action handlers
+  const enhanceNodeData = useCallback((node: Node) => {
+    if (node.type === 'note') {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          onEdit: (noteId: string) => {
+            setEditingNote(node);
+            setIsEditSidebarOpen(true);
+          },
+          onRead: (noteId: string) => {
+            setReadingNote(node);
+            setIsReadSidebarOpen(true);
+          },
+          onLink: (noteId: string) => {
+            if (linkingMode && linkingFrom && linkingFrom !== noteId) {
+              // Create connection
+              const newEdge = {
+                id: `edge-${linkingFrom}-${noteId}`,
+                source: linkingFrom,
+                target: noteId,
+                type: 'smoothstep',
+                style: { stroke: 'hsl(var(--galaxy-connection))', strokeWidth: 2 },
+                animated: true,
+              };
+              setEdges((eds) => addEdge(newEdge, eds));
+              setLinkingMode(false);
+              setLinkingFrom(null);
+              toast({
+                title: "Notes Connected",
+                description: "Successfully linked your notes together.",
+              });
+            } else {
+              setLinkingMode(true);
+              setLinkingFrom(noteId);
+              toast({
+                title: "Link Mode Active",
+                description: "Click another note to create a connection.",
+              });
+            }
+          },
+        },
+      };
+    }
+    return node;
+  }, [linkingMode, linkingFrom, setEdges, toast]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -91,7 +263,30 @@ export const MindMap = () => {
     [setEdges, toast]
   );
 
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    if (node.type === 'galaxy' && viewMode === 'galaxies') {
+      // Zoom into galaxy
+      const galaxyNotesList = galaxyNotes[node.id as keyof typeof galaxyNotes] || [];
+      setCurrentGalaxy(node.id);
+      setViewMode('notes');
+      setNodes(galaxyNotesList);
+      setEdges([]);
+      toast({
+        title: `Entered ${node.data.name} Galaxy`,
+        description: `Now viewing ${galaxyNotesList.length} notes in this galaxy.`,
+      });
+    }
+  }, [viewMode, setNodes, setEdges, toast]);
+
   const addNewNote = useCallback(() => {
+    if (viewMode === 'galaxies') {
+      toast({
+        title: "Navigate to a Galaxy",
+        description: "Click on a galaxy to add notes to it.",
+      });
+      return;
+    }
+
     const newId = String(nodeIdRef.current++);
     const themes = ['royal', 'cosmic', 'stellar', 'nebula'];
     const randomTheme = themes[Math.floor(Math.random() * themes.length)];
@@ -107,6 +302,7 @@ export const MindMap = () => {
         title: 'New Note',
         content: 'Start writing your thoughts...',
         theme: randomTheme,
+        galaxy: currentGalaxy || 'Unknown',
       },
     };
 
@@ -115,7 +311,7 @@ export const MindMap = () => {
       title: "Note Created",
       description: "A new note has been added to your galaxy.",
     });
-  }, [setNodes, toast]);
+  }, [viewMode, currentGalaxy, setNodes, toast]);
 
   const deleteSelectedNodes = useCallback(() => {
     setNodes((nds) => nds.filter((node) => !node.selected));
@@ -130,19 +326,99 @@ export const MindMap = () => {
     });
   }, [setNodes, setEdges, nodes, toast]);
 
+  const navigateToGalaxies = useCallback(() => {
+    setViewMode('galaxies');
+    setCurrentGalaxy(null);
+    setNodes(initialGalaxies);
+    setEdges([]);
+    setLinkingMode(false);
+    setLinkingFrom(null);
+    toast({
+      title: "Zoomed Out",
+      description: "Now viewing all galaxies.",
+    });
+  }, [setNodes, setEdges, toast]);
+
+  const handleSearch = useCallback((query: string) => {
+    const results: any[] = [];
+    
+    // Search through all galaxy notes
+    Object.entries(galaxyNotes).forEach(([galaxyId, notes]) => {
+      const galaxyName = initialGalaxies.find(g => g.id === galaxyId)?.data.name || 'Unknown';
+      notes.forEach(note => {
+        if (
+          note.data.title.toLowerCase().includes(query.toLowerCase()) ||
+          note.data.content.toLowerCase().includes(query.toLowerCase())
+        ) {
+          results.push({
+            id: note.id,
+            title: note.data.title,
+            content: note.data.content,
+            galaxy: galaxyName,
+            theme: note.data.theme,
+            galaxyId,
+          });
+        }
+      });
+    });
+    
+    return results;
+  }, []);
+
+  const navigateToNote = useCallback((noteId: string) => {
+    const result = handleSearch('').find(r => r.id === noteId);
+    if (result) {
+      // Navigate to the galaxy containing the note
+      const galaxyNotesList = galaxyNotes[result.galaxyId as keyof typeof galaxyNotes] || [];
+      setCurrentGalaxy(result.galaxyId);
+      setViewMode('notes');
+      setNodes(galaxyNotesList);
+      setEdges([]);
+      
+      // Focus on the specific note
+      setTimeout(() => {
+        const noteElement = document.querySelector(`[data-id="${noteId}"]`);
+        if (noteElement) {
+          noteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      
+      toast({
+        title: "Note Found",
+        description: `Navigated to "${result.title}" in ${result.galaxy} galaxy.`,
+      });
+    }
+  }, [handleSearch, setNodes, setEdges, toast]);
+
+  const handleSaveNote = useCallback((noteId: string, title: string, content: string) => {
+    setNodes((nds) => nds.map(node => 
+      node.id === noteId 
+        ? { ...node, data: { ...node.data, title, content } }
+        : node
+    ));
+    toast({
+      title: "Note Saved",
+      description: "Your changes have been saved.",
+    });
+  }, [setNodes, toast]);
+
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark');
   };
 
+  // Enhanced nodes with action handlers
+  const enhancedNodes = nodes.map(enhanceNodeData);
+
   return (
     <div className={`h-screen w-full transition-colors duration-300 ${isDarkMode ? 'dark' : ''}`}>
       <ReactFlow
-        nodes={nodes}
+        nodes={enhancedNodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
         fitView
@@ -171,6 +447,21 @@ export const MindMap = () => {
           <Toolbar 
             onAddNote={addNewNote}
             onDeleteSelected={deleteSelectedNodes}
+            onNavigateToGalaxies={viewMode === 'notes' ? navigateToGalaxies : undefined}
+            viewMode={viewMode}
+            currentGalaxy={currentGalaxy}
+            linkingMode={linkingMode}
+            onCancelLinking={() => {
+              setLinkingMode(false);
+              setLinkingFrom(null);
+            }}
+          />
+        </Panel>
+
+        <Panel position="top-center">
+          <SearchBar 
+            onSearch={handleSearch}
+            onNavigateToNote={navigateToNote}
           />
         </Panel>
 
@@ -181,11 +472,66 @@ export const MindMap = () => {
         <Panel position="bottom-center" className="text-center">
           <div className="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-galaxy-node-border shadow-galaxy-node">
             <p className="text-sm text-muted-foreground">
-              <strong>Galaxy Mind Map</strong> • Drag to pan • Scroll to zoom • Double-click notes to edit • Drag from node edges to connect
+              <strong>Galaxy Mind Map</strong> • 
+              {viewMode === 'galaxies' 
+                ? 'Click galaxies to explore • Search to find notes'
+                : `${currentGalaxy ? initialGalaxies.find(g => g.id === currentGalaxy)?.data.name : 'Notes'} Galaxy • Hover notes for actions • Link mode: ${linkingMode ? 'ON' : 'OFF'}`
+              }
             </p>
           </div>
         </Panel>
       </ReactFlow>
+
+      <EditSidebar
+        isOpen={isEditSidebarOpen}
+        onClose={() => {
+          setIsEditSidebarOpen(false);
+          setEditingNote(null);
+        }}
+        noteData={editingNote}
+        onSave={handleSaveNote}
+      />
+
+      <ReadSidebar
+        isOpen={isReadSidebarOpen}
+        onClose={() => {
+          setIsReadSidebarOpen(false);
+          setReadingNote(null);
+        }}
+        noteData={readingNote}
+        onEdit={(noteId) => {
+          setIsReadSidebarOpen(false);
+          setEditingNote(readingNote);
+          setIsEditSidebarOpen(true);
+        }}
+        onLink={(noteId) => {
+          setIsReadSidebarOpen(false);
+          if (linkingMode && linkingFrom && linkingFrom !== noteId) {
+            const newEdge = {
+              id: `edge-${linkingFrom}-${noteId}`,
+              source: linkingFrom,
+              target: noteId,
+              type: 'smoothstep',
+              style: { stroke: 'hsl(var(--galaxy-connection))', strokeWidth: 2 },
+              animated: true,
+            };
+            setEdges((eds) => addEdge(newEdge, eds));
+            setLinkingMode(false);
+            setLinkingFrom(null);
+            toast({
+              title: "Notes Connected",
+              description: "Successfully linked your notes together.",
+            });
+          } else {
+            setLinkingMode(true);
+            setLinkingFrom(noteId);
+            toast({
+              title: "Link Mode Active",
+              description: "Click another note to create a connection.",
+            });
+          }
+        }}
+      />
     </div>
   );
 };

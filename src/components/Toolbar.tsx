@@ -1,39 +1,88 @@
 import React from 'react';
+import { Plus, Trash2, Sparkles, ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Sparkles } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface ToolbarProps {
   onAddNote: () => void;
   onDeleteSelected: () => void;
+  onNavigateToGalaxies?: () => void;
+  viewMode: 'galaxies' | 'notes';
+  currentGalaxy?: string | null;
+  linkingMode?: boolean;
+  onCancelLinking?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onAddNote, onDeleteSelected }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ 
+  onAddNote, 
+  onDeleteSelected, 
+  onNavigateToGalaxies,
+  viewMode,
+  currentGalaxy,
+  linkingMode,
+  onCancelLinking,
+}) => {
   return (
-    <div className="flex gap-2 bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-galaxy-node-border shadow-galaxy-node">
+    <Card className="flex items-center gap-2 p-2 bg-card/80 backdrop-blur-sm border-galaxy-node-border shadow-galaxy-node">
+      {onNavigateToGalaxies && (
+        <Button
+          onClick={onNavigateToGalaxies}
+          size="sm"
+          variant="outline"
+          className="border-galaxy-node-border"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Galaxies
+        </Button>
+      )}
+      
       <Button
-        variant="outline"
-        size="sm"
         onClick={onAddNote}
-        className="gap-2 hover:shadow-galaxy-glow transition-all duration-300"
+        size="sm"
+        className="bg-galaxy-node hover:bg-galaxy-node-border text-galaxy-node-border hover:text-card"
+        disabled={viewMode === 'galaxies'}
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-4 w-4 mr-2" />
         Add Note
       </Button>
       
       <Button
-        variant="outline"
-        size="sm"
         onClick={onDeleteSelected}
-        className="gap-2 text-destructive hover:text-destructive-foreground hover:bg-destructive hover:shadow-galaxy-glow transition-all duration-300"
+        size="sm"
+        variant="outline"
+        className="border-galaxy-node-border hover:bg-destructive hover:text-destructive-foreground"
       >
-        <Trash2 className="h-4 w-4" />
+        <Trash2 className="h-4 w-4 mr-2" />
         Delete
       </Button>
 
-      <div className="flex items-center gap-2 px-3 py-1 text-sm text-muted-foreground">
-        <Sparkles className="h-4 w-4 text-galaxy-glow" />
-        <span className="font-medium">Galaxy Mind</span>
+      {linkingMode && onCancelLinking && (
+        <Button
+          onClick={onCancelLinking}
+          size="sm"
+          variant="outline"
+          className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+        >
+          <X className="h-4 w-4 mr-2" />
+          Cancel Link
+        </Button>
+      )}
+      
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 text-galaxy-glow">
+          <Sparkles className="h-3 w-3" />
+          <span className="text-xs font-medium">
+            {viewMode === 'galaxies' ? 'Galaxy View' : `${currentGalaxy ? 'Note View' : 'Notes'}`}
+          </span>
+        </div>
+        
+        {linkingMode && (
+          <Badge variant="secondary" className="text-xs">
+            Linking Mode
+          </Badge>
+        )}
       </div>
-    </div>
+    </Card>
   );
 };
