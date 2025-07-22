@@ -8,33 +8,50 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Galaxy Light Theme */
+    --background: 240 100% 99%;
+    --foreground: 224 71% 4%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 100% 98%;
+    --card-foreground: 224 71% 4%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 100% 98%;
+    --popover-foreground: 224 71% 4%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 225 73% 57%;
+    --primary-foreground: 240 100% 99%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 60% 96%;
+    --secondary-foreground: 225 73% 17%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 40% 96%;
+    --muted-foreground: 240 5% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 240 80% 95%;
+    --accent-foreground: 225 73% 17%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 240 100% 99%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 240 20% 90%;
+    --input: 240 20% 90%;
+    --ring: 225 73% 57%;
+
+    /* Galaxy specific colors */
+    --galaxy-bg: 240 100% 99%;
+    --galaxy-node: 225 73% 97%;
+    --galaxy-node-border: 225 73% 57%;
+    --galaxy-connection: 225 73% 67%;
+    --galaxy-glow: 225 73% 77%;
+    --galaxy-accent: 260 100% 85%;
+    
+    /* Gradients */
+    --gradient-galaxy: linear-gradient(135deg, hsl(240 100% 99%), hsl(240 80% 95%));
+    --gradient-node: linear-gradient(145deg, hsl(225 73% 97%), hsl(240 80% 95%));
+    
+    /* Shadows */
+    --shadow-galaxy-node: 0 4px 20px -4px hsl(225 73% 57% / 0.15);
+    --shadow-galaxy-glow: 0 0 30px hsl(225 73% 77% / 0.3);
 
     --radius: 0.5rem;
 
@@ -56,33 +73,50 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Galaxy Dark Theme */
+    --background: 224 71% 4%;
+    --foreground: 240 100% 99%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 71% 6%;
+    --card-foreground: 240 100% 99%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 71% 6%;
+    --popover-foreground: 240 100% 99%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 225 73% 57%;
+    --primary-foreground: 224 71% 4%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 224 71% 10%;
+    --secondary-foreground: 240 100% 99%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 224 71% 10%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 225 73% 20%;
+    --accent-foreground: 240 100% 99%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 240 100% 99%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 224 71% 12%;
+    --input: 224 71% 12%;
+    --ring: 225 73% 57%;
+
+    /* Galaxy specific colors - Dark */
+    --galaxy-bg: 224 71% 4%;
+    --galaxy-node: 224 71% 8%;
+    --galaxy-node-border: 225 73% 57%;
+    --galaxy-connection: 225 73% 67%;
+    --galaxy-glow: 225 73% 77%;
+    --galaxy-accent: 260 100% 70%;
+    
+    /* Gradients - Dark */
+    --gradient-galaxy: linear-gradient(135deg, hsl(224 71% 4%), hsl(224 71% 8%));
+    --gradient-node: linear-gradient(145deg, hsl(224 71% 8%), hsl(224 71% 12%));
+    
+    /* Shadows - Dark */
+    --shadow-galaxy-node: 0 4px 20px -4px hsl(225 73% 57% / 0.25);
+    --shadow-galaxy-glow: 0 0 40px hsl(225 73% 77% / 0.4);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

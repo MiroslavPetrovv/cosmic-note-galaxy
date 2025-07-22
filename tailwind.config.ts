@@ -61,7 +61,23 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				galaxy: {
+					bg: 'hsl(var(--galaxy-bg))',
+					node: 'hsl(var(--galaxy-node))',
+					'node-border': 'hsl(var(--galaxy-node-border))',
+					connection: 'hsl(var(--galaxy-connection))',
+					glow: 'hsl(var(--galaxy-glow))',
+					accent: 'hsl(var(--galaxy-accent))'
 				}
+			},
+			backgroundImage: {
+				'gradient-galaxy': 'var(--gradient-galaxy)',
+				'gradient-node': 'var(--gradient-node)'
+			},
+			boxShadow: {
+				'galaxy-node': 'var(--shadow-galaxy-node)',
+				'galaxy-glow': 'var(--shadow-galaxy-glow)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
