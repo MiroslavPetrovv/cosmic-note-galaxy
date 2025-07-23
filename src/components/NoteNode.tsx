@@ -85,7 +85,7 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
       />
 
       {/* Action Buttons */}
-      {(isHovered || isEditing) && !isEditing && (
+      {isHovered && !isEditing && (
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <Button
             size="icon"

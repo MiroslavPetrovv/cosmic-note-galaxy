@@ -443,7 +443,7 @@ export const MindMap = () => {
           showInteractive={false}
         />
 
-        <Panel position="top-left" className="flex gap-2">
+        <Panel position="top-left" className="flex flex-col gap-2 max-w-sm">
           <Toolbar 
             onAddNote={addNewNote}
             onDeleteSelected={deleteSelectedNodes}
@@ -456,9 +456,6 @@ export const MindMap = () => {
               setLinkingFrom(null);
             }}
           />
-        </Panel>
-
-        <Panel position="top-center">
           <SearchBar 
             onSearch={handleSearch}
             onNavigateToNote={navigateToNote}
