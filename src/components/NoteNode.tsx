@@ -93,6 +93,7 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
             className="h-6 w-6 bg-card/80 hover:bg-accent"
             onClick={(e) => {
               e.stopPropagation();
+              console.log('Read button clicked for note:', id, 'onRead function:', noteData.onRead);
               noteData.onRead?.(id);
             }}
           >
@@ -104,6 +105,7 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
             className="h-6 w-6 bg-card/80 hover:bg-accent"
             onClick={(e) => {
               e.stopPropagation();
+              console.log('Edit button clicked for note:', id, 'onEdit function:', noteData.onEdit);
               noteData.onEdit?.(id);
             }}
           >
@@ -115,6 +117,7 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
             className="h-6 w-6 bg-card/80 hover:bg-accent"
             onClick={(e) => {
               e.stopPropagation();
+              console.log('Link button clicked for note:', id, 'onLink function:', noteData.onLink);
               noteData.onLink?.(id);
             }}
           >

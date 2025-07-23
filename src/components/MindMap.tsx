@@ -466,10 +466,11 @@ export const MindMap = () => {
           <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
         </Panel>
 
-        <Panel position="bottom-center" className="text-center">
+        <Panel position="bottom-center" className="text-center max-w-2xl">
           <div className="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-galaxy-node-border shadow-galaxy-node">
             <p className="text-sm text-muted-foreground">
-              <strong>Galaxy Mind Map</strong> • 
+              <strong>Galaxy Mind Map</strong>
+              <br />
               {viewMode === 'galaxies' 
                 ? 'Click galaxies to explore • Search to find notes'
                 : `${currentGalaxy ? initialGalaxies.find(g => g.id === currentGalaxy)?.data.name : 'Notes'} Galaxy • Hover notes for actions • Link mode: ${linkingMode ? 'ON' : 'OFF'}`
