@@ -69,16 +69,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </Button>
       )}
       
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 text-galaxy-glow">
-          <Sparkles className="h-3 w-3" />
-          <span className="text-xs font-medium">
-            {viewMode === 'galaxies' ? 'Galaxy View' : `${currentGalaxy ? 'Note View' : 'Notes'}`}
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1 text-galaxy-glow min-w-0">
+          <Sparkles className="h-3 w-3 flex-shrink-0" />
+          <span className="text-xs font-medium truncate">
+            {viewMode === 'galaxies' ? 'Galaxy View' : 'Note View'}
           </span>
         </div>
         
         {linkingMode && (
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="text-xs flex-shrink-0">
             Linking Mode
           </Badge>
         )}

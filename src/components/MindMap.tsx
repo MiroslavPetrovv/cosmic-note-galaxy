@@ -188,6 +188,7 @@ export const MindMap = () => {
   const [currentGalaxy, setCurrentGalaxy] = useState<string | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialGalaxies);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [galaxyEdges, setGalaxyEdges] = useState<{[key: string]: Edge[]}>({});
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isEditSidebarOpen, setIsEditSidebarOpen] = useState(false);
   const [isReadSidebarOpen, setIsReadSidebarOpen] = useState(false);
@@ -282,13 +283,15 @@ export const MindMap = () => {
       setCurrentGalaxy(node.id);
       setViewMode('notes');
       setNodes(galaxyNotesList);
-      setEdges([]);
+      // Restore edges for this galaxy if they exist
+      const savedEdges = galaxyEdges[node.id] || [];
+      setEdges(savedEdges);
       toast({
         title: `Entered ${node.data.name} Galaxy`,
         description: `Now viewing ${galaxyNotesList.length} notes in this galaxy.`,
       });
     }
-  }, [viewMode, setNodes, setEdges, toast]);
+  }, [viewMode, setNodes, setEdges, galaxyEdges, toast]);
 
   const addNewNote = useCallback(() => {
     if (viewMode === 'galaxies') {
@@ -339,6 +342,14 @@ export const MindMap = () => {
   }, [setNodes, setEdges, nodes, toast]);
 
   const navigateToGalaxies = useCallback(() => {
+    // Save current galaxy edges before leaving
+    if (currentGalaxy && edges.length > 0) {
+      setGalaxyEdges(prev => ({
+        ...prev,
+        [currentGalaxy]: edges
+      }));
+    }
+    
     setViewMode('galaxies');
     setCurrentGalaxy(null);
     setNodes(initialGalaxies);
@@ -349,7 +360,7 @@ export const MindMap = () => {
       title: "Zoomed Out",
       description: "Now viewing all galaxies.",
     });
-  }, [setNodes, setEdges, toast]);
+  }, [setNodes, setEdges, currentGalaxy, edges, toast]);
 
   const handleSearch = useCallback((query: string) => {
     const results: any[] = [];
