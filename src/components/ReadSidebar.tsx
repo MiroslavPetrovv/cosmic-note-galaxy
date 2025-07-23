@@ -35,13 +35,12 @@ export const ReadSidebar: React.FC<ReadSidebarProps> = ({
         onClick={onClose}
       />
       
-      {/* Sidebar */}
+      {/* Full-screen Modal */}
       <div 
         className={cn(
-          'fixed top-0 right-0 h-full w-96 bg-card border-l border-border z-50',
-          'transform transition-transform duration-300 ease-in-out',
-          'shadow-2xl',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          'fixed inset-0 bg-card z-50',
+          'transform transition-all duration-300 ease-in-out',
+          isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
         )}
       >
         <div className="flex flex-col h-full">
@@ -77,17 +76,18 @@ export const ReadSidebar: React.FC<ReadSidebarProps> = ({
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+          <div className="flex-1 p-8 max-w-4xl mx-auto space-y-6 overflow-y-auto">
             {noteData && (
               <>
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground mb-4">
+                <div className="mb-8">
+                  <h1 className="text-4xl font-bold text-foreground mb-2">
                     {noteData.title}
                   </h1>
+                  <div className="w-16 h-1 bg-primary rounded-full"></div>
                 </div>
 
-                <div className="prose prose-sm max-w-none">
-                  <div className="text-foreground leading-relaxed whitespace-pre-wrap">
+                <div className="prose prose-lg max-w-none">
+                  <div className="text-foreground leading-relaxed whitespace-pre-wrap text-lg">
                     {noteData.content}
                   </div>
                 </div>

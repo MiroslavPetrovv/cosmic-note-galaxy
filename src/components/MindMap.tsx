@@ -206,11 +206,23 @@ export const MindMap = () => {
         data: {
           ...node.data,
           onEdit: (noteId: string) => {
-            setEditingNote(node);
+            const nodeData = {
+              id: node.id,
+              title: node.data.title,
+              content: node.data.content,
+              theme: node.data.theme
+            };
+            setEditingNote(nodeData);
             setIsEditSidebarOpen(true);
           },
           onRead: (noteId: string) => {
-            setReadingNote(node);
+            const nodeData = {
+              id: node.id,
+              title: node.data.title,
+              content: node.data.content,
+              theme: node.data.theme
+            };
+            setReadingNote(nodeData);
             setIsReadSidebarOpen(true);
           },
           onLink: (noteId: string) => {
