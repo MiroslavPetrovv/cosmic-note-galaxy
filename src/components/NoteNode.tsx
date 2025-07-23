@@ -85,46 +85,32 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
       />
 
       {/* Action Buttons */}
-      {isHovered && !isEditing && (
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-6 w-6 bg-card/80 hover:bg-accent"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Read button clicked for note:', id, 'onRead function:', noteData.onRead);
-              noteData.onRead?.(id);
-            }}
-          >
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-6 w-6 bg-card/80 hover:bg-accent"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Edit button clicked for note:', id, 'onEdit function:', noteData.onEdit);
-              noteData.onEdit?.(id);
-            }}
-          >
-            <Edit3 className="h-3 w-3" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-6 w-6 bg-card/80 hover:bg-accent"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Link button clicked for note:', id, 'onLink function:', noteData.onLink);
-              noteData.onLink?.(id);
-            }}
-          >
-            <Link className="h-3 w-3" />
-          </Button>
-        </div>
-      )}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 bg-card/90 hover:bg-primary hover:text-primary-foreground border border-border/50 shadow-sm transition-all duration-200 hover:scale-110"
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('View button clicked for note:', id, 'onRead function:', noteData.onRead);
+            noteData.onRead?.(id);
+          }}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 bg-card/90 hover:bg-primary hover:text-primary-foreground border border-border/50 shadow-sm transition-all duration-200 hover:scale-110"
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('Edit button clicked for note:', id, 'onEdit function:', noteData.onEdit);
+            noteData.onEdit?.(id);
+          }}
+        >
+          <Edit3 className="h-4 w-4" />
+        </Button>
+      </div>
 
       <div className="space-y-3">
         {isEditing ? (
