@@ -4,13 +4,19 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Edit3, Link, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NoteType, getNoteTypeIcon, getNoteTypeColor } from './NoteTypeSelector';
+import { getTagById } from '@/utils/tags';
 
 interface NoteData {
   title: string;
   content: string;
   theme: 'royal' | 'cosmic' | 'stellar' | 'nebula';
+  noteType?: NoteType;
+  tags?: string[];
+  priority?: 'high' | 'medium' | 'low';
   onEdit?: (noteId: string) => void;
   onLink?: (noteId: string) => void;
   onRead?: (noteId: string) => void;
@@ -29,6 +35,19 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
   const noteData = data as unknown as NoteData;
   const [title, setTitle] = useState(noteData.title);
   const [content, setContent] = useState(noteData.content);
+  
+  // Get note type info
+  const noteType = noteData.noteType || 'note';
+  const NoteTypeIcon = getNoteTypeIcon(noteType);
+  const noteTypeColor = getNoteTypeColor(noteType);
+  
+  // Get priority color
+  const priorityColors = {
+    high: 'hsl(0, 84%, 60%)',
+    medium: 'hsl(45, 93%, 58%)',
+    low: 'hsl(120, 60%, 50%)'
+  };
+  const priorityColor = noteData.priority ? priorityColors[noteData.priority] : undefined;
 
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
@@ -54,7 +73,10 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
         'w-64 min-h-32 p-4 transition-all duration-300 cursor-pointer hover:scale-105 relative group',
         themeStyles[noteData.theme],
         selected && 'ring-2 ring-primary ring-offset-2',
-        'backdrop-blur-sm'
+        'backdrop-blur-sm',
+        noteData.priority === 'high' && 'border-l-4 border-l-red-500',
+        noteData.priority === 'medium' && 'border-l-4 border-l-yellow-500',
+        noteData.priority === 'low' && 'border-l-4 border-l-green-500'
       )}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -112,7 +134,15 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
         </Button>
       </div>
 
-      <div className="space-y-3">
+      {/* Note Type Icon */}
+      <div className="absolute top-3 left-3 z-10">
+        <NoteTypeIcon 
+          className="h-4 w-4" 
+          style={{ color: noteTypeColor }}
+        />
+      </div>
+
+      <div className="space-y-3 mt-2">
         {isEditing ? (
           <Input
             value={title}
@@ -141,6 +171,33 @@ export const NoteNode = memo(({ id, data, selected }: NodeProps) => {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {content}
           </p>
+        )}
+        
+        {/* Tags */}
+        {noteData.tags && noteData.tags.length > 0 && !isEditing && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {noteData.tags.slice(0, 3).map((tagId) => {
+              const tag = getTagById(tagId);
+              return tag ? (
+                <Badge 
+                  key={tag.id} 
+                  variant="outline" 
+                  className="text-xs px-2 py-0.5"
+                  style={{ 
+                    borderColor: tag.color,
+                    color: tag.color 
+                  }}
+                >
+                  {tag.name}
+                </Badge>
+              ) : null;
+            })}
+            {noteData.tags.length > 3 && (
+              <Badge variant="outline" className="text-xs px-2 py-0.5">
+                +{noteData.tags.length - 3}
+              </Badge>
+            )}
+          </div>
         )}
       </div>
 

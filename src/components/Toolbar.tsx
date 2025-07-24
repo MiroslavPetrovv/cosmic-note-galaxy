@@ -1,24 +1,27 @@
 import React from 'react';
-import { Plus, Trash2, Sparkles, ArrowLeft, X, Save } from 'lucide-react';
+import { Plus, Trash2, Sparkles, ArrowLeft, X, Save, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { TemplateSelector } from './TemplateSelector';
 import { getLastSavedTime } from '@/hooks/useAutoSave';
 
 interface ToolbarProps {
   onAddNote: () => void;
   onDeleteSelected: () => void;
   onNavigateToGalaxies?: () => void;
+  onUseTemplate?: (template: any) => void;
   viewMode: 'galaxies' | 'notes';
   currentGalaxy?: string | null;
   linkingMode?: boolean;
   onCancelLinking?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ 
-  onAddNote, 
-  onDeleteSelected, 
+export const Toolbar: React.FC<ToolbarProps> = ({
+  onAddNote,
+  onDeleteSelected,
   onNavigateToGalaxies,
+  onUseTemplate,
   viewMode,
   currentGalaxy,
   linkingMode,
@@ -36,6 +39,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <ArrowLeft className="h-4 w-4 mr-2" />
           Galaxies
         </Button>
+      )}
+      
+      {onUseTemplate && viewMode === 'galaxies' && (
+        <TemplateSelector 
+          onSelectTemplate={onUseTemplate}
+          trigger={
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-galaxy-node-border"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Templates
+            </Button>
+          }
+        />
       )}
       
       <Button

@@ -331,10 +331,10 @@ export const MindMap = () => {
     }
   }, [handleSearch, setNodes, setEdges, toast]);
 
-  const handleSaveNote = useCallback((noteId: string, title: string, content: string) => {
+  const handleSaveNote = useCallback((noteId: string, title: string, content: string, noteType?: any, tags?: string[], priority?: any) => {
     setNodes((nds) => nds.map(node => 
       node.id === noteId 
-        ? { ...node, data: { ...node.data, title, content } }
+        ? { ...node, data: { ...node.data, title, content, noteType, tags, priority } }
         : node
     ));
     toast({
@@ -342,6 +342,19 @@ export const MindMap = () => {
       description: "Your changes have been saved.",
     });
   }, [setNodes, toast]);
+
+  const handleUseTemplate = useCallback((template: any) => {
+    setGalaxies(template.galaxies);
+    setGalaxyNotes(template.galaxyNotes);
+    setNodes(template.galaxies);
+    setEdges([]);
+    setViewMode('galaxies');
+    setCurrentGalaxy(null);
+    toast({
+      title: "Template Applied",
+      description: `${template.name} template has been loaded.`,
+    });
+  }, [setNodes, setEdges, toast]);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -389,6 +402,7 @@ export const MindMap = () => {
             onAddNote={addNewNote}
             onDeleteSelected={deleteSelectedNodes}
             onNavigateToGalaxies={viewMode === 'notes' ? navigateToGalaxies : undefined}
+            onUseTemplate={viewMode === 'galaxies' ? handleUseTemplate : undefined}
             viewMode={viewMode}
             currentGalaxy={currentGalaxy}
             linkingMode={linkingMode}
