@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import {
   ReactFlow,
   addEdge,
@@ -23,170 +23,25 @@ import { EditSidebar } from './EditSidebar';
 import { ReadSidebar } from './ReadSidebar';
 import { SearchBar } from './SearchBar';
 import { useToast } from '@/hooks/use-toast';
+import { useAutoSave } from '@/hooks/useAutoSave';
+import { getDefaultGalaxies, getDefaultGalaxyNotes, updateGalaxyNoteCounts } from '@/utils/storage';
 
 const nodeTypes = {
   note: NoteNode,
   galaxy: GalaxyNode,
 };
 
-// Galaxy view nodes
-const initialGalaxies: Node[] = [
-  {
-    id: 'galaxy-js',
-    type: 'galaxy',
-    position: { x: 200, y: 200 },
-    data: { 
-      name: 'JavaScript',
-      noteCount: 3,
-      theme: 'royal'
-    },
-  },
-  {
-    id: 'galaxy-design',
-    type: 'galaxy',
-    position: { x: 500, y: 100 },
-    data: { 
-      name: 'Design',
-      noteCount: 2,
-      theme: 'cosmic'
-    },
-  },
-  {
-    id: 'galaxy-projects',
-    type: 'galaxy',
-    position: { x: 300, y: 400 },
-    data: { 
-      name: 'Projects',
-      noteCount: 4,
-      theme: 'stellar'
-    },
-  },
-];
-
-// Notes for each galaxy
-const galaxyNotes = {
-  'galaxy-js': [
-    {
-      id: 'js-1',
-      type: 'note',
-      position: { x: 250, y: 150 },
-      data: { 
-        title: 'React Hooks',
-        content: 'useState, useEffect, useCallback - the essential hooks for modern React development.',
-        theme: 'royal',
-        galaxy: 'JavaScript'
-      },
-    },
-    {
-      id: 'js-2',
-      type: 'note',
-      position: { x: 550, y: 200 },
-      data: { 
-        title: 'Async/Await',
-        content: 'Modern way to handle asynchronous operations in JavaScript.',
-        theme: 'royal',
-        galaxy: 'JavaScript'
-      },
-    },
-    {
-      id: 'js-3',
-      type: 'note',
-      position: { x: 100, y: 350 },
-      data: { 
-        title: 'ES6 Features',
-        content: 'Arrow functions, destructuring, template literals, and more.',
-        theme: 'royal',
-        galaxy: 'JavaScript'
-      },
-    },
-  ],
-  'galaxy-design': [
-    {
-      id: 'design-1',
-      type: 'note',
-      position: { x: 200, y: 200 },
-      data: { 
-        title: 'Color Theory',
-        content: 'Understanding color harmony and psychology in design.',
-        theme: 'cosmic',
-        galaxy: 'Design'
-      },
-    },
-    {
-      id: 'design-2',
-      type: 'note',
-      position: { x: 450, y: 300 },
-      data: { 
-        title: 'Typography',
-        content: 'The art of arranging type to make written language legible and appealing.',
-        theme: 'cosmic',
-        galaxy: 'Design'
-      },
-    },
-  ],
-  'galaxy-projects': [
-    {
-      id: 'proj-1',
-      type: 'note',
-      position: { x: 300, y: 150 },
-      data: { 
-        title: 'Mind Map App',
-        content: 'Building a galaxy-themed mind mapping application.',
-        theme: 'stellar',
-        galaxy: 'Projects'
-      },
-    },
-    {
-      id: 'proj-2',
-      type: 'note',
-      position: { x: 150, y: 300 },
-      data: { 
-        title: 'Portfolio Website',
-        content: 'Creating a personal portfolio to showcase work.',
-        theme: 'stellar',
-        galaxy: 'Projects'
-      },
-    },
-    {
-      id: 'proj-3',
-      type: 'note',
-      position: { x: 500, y: 250 },
-      data: { 
-        title: 'Learning Goals',
-        content: 'Track progress on learning new technologies.',
-        theme: 'stellar',
-        galaxy: 'Projects'
-      },
-    },
-    {
-      id: 'proj-4',
-      type: 'note',
-      position: { x: 350, y: 400 },
-      data: { 
-        title: 'Team Collaboration',
-        content: 'Best practices for working with development teams.',
-        theme: 'stellar',
-        galaxy: 'Projects'
-      },
-    },
-  ],
-};
-
-const initialEdges: Edge[] = [
-  {
-    id: 'e1-2',
-    source: '1',
-    target: '2',
-    type: 'smoothstep',
-    style: { stroke: 'hsl(var(--galaxy-connection))', strokeWidth: 2 },
-    animated: true,
-  },
-];
 
 export const MindMap = () => {
+  // Auto-save hook
+  const { saveData, loadData, debouncedSave } = useAutoSave();
+  
+  // Dynamic state management
   const [viewMode, setViewMode] = useState<'galaxies' | 'notes'>('galaxies');
   const [currentGalaxy, setCurrentGalaxy] = useState<string | null>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialGalaxies);
+  const [galaxies, setGalaxies] = useState<Node[]>(getDefaultGalaxies());
+  const [galaxyNotes, setGalaxyNotes] = useState<{[key: string]: Node[]}>(getDefaultGalaxyNotes());
+  const [nodes, setNodes, onNodesChange] = useNodesState(getDefaultGalaxies());
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [galaxyEdges, setGalaxyEdges] = useState<{[key: string]: Edge[]}>({});
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -198,6 +53,67 @@ export const MindMap = () => {
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
   const nodeIdRef = useRef(100);
   const { toast } = useToast();
+
+  // Load saved data on mount
+  useEffect(() => {
+    const savedData = loadData();
+    if (savedData) {
+      setGalaxies(savedData.galaxies);
+      setGalaxyNotes(savedData.galaxyNotes);
+      setGalaxyEdges(savedData.galaxyEdges);
+      setViewMode(savedData.viewMode);
+      setCurrentGalaxy(savedData.currentGalaxy);
+      
+      // Set initial view based on saved state
+      if (savedData.viewMode === 'galaxies') {
+        setNodes(savedData.galaxies);
+        setEdges([]);
+      } else if (savedData.currentGalaxy && savedData.galaxyNotes[savedData.currentGalaxy]) {
+        setNodes(savedData.galaxyNotes[savedData.currentGalaxy]);
+        setEdges(savedData.galaxyEdges[savedData.currentGalaxy] || []);
+      }
+      
+      toast({
+        title: "Mind Map Restored",
+        description: "Your previous work has been loaded successfully.",
+      });
+    }
+  }, [loadData, setNodes, setEdges, toast]);
+
+  // Auto-save when data changes
+  useEffect(() => {
+    const currentData = {
+      galaxies: updateGalaxyNoteCounts(galaxies, galaxyNotes),
+      galaxyNotes,
+      galaxyEdges,
+      currentGalaxy,
+      viewMode,
+      lastSaved: Date.now()
+    };
+
+    const clearSaveTimeout = debouncedSave(currentData);
+    return clearSaveTimeout;
+  }, [galaxies, galaxyNotes, galaxyEdges, currentGalaxy, viewMode, debouncedSave]);
+
+  // Auto-save current galaxy notes when switching views
+  useEffect(() => {
+    if (currentGalaxy && viewMode === 'notes') {
+      setGalaxyNotes(prev => ({
+        ...prev,
+        [currentGalaxy]: nodes.filter(node => node.type === 'note')
+      }));
+    }
+  }, [nodes, currentGalaxy, viewMode]);
+
+  // Auto-save current galaxy edges
+  useEffect(() => {
+    if (currentGalaxy && viewMode === 'notes') {
+      setGalaxyEdges(prev => ({
+        ...prev,
+        [currentGalaxy]: edges
+      }));
+    }
+  }, [edges, currentGalaxy, viewMode]);
 
   // Enhanced node data with action handlers
   const enhanceNodeData = useCallback((node: Node) => {
@@ -279,7 +195,7 @@ export const MindMap = () => {
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     if (node.type === 'galaxy' && viewMode === 'galaxies') {
       // Zoom into galaxy
-      const galaxyNotesList = galaxyNotes[node.id as keyof typeof galaxyNotes] || [];
+      const galaxyNotesList = galaxyNotes[node.id] || [];
       setCurrentGalaxy(node.id);
       setViewMode('notes');
       setNodes(galaxyNotesList);
@@ -291,7 +207,7 @@ export const MindMap = () => {
         description: `Now viewing ${galaxyNotesList.length} notes in this galaxy.`,
       });
     }
-  }, [viewMode, setNodes, setEdges, galaxyEdges, toast]);
+  }, [viewMode, setNodes, setEdges, galaxyNotes, galaxyEdges, toast]);
 
   const addNewNote = useCallback(() => {
     if (viewMode === 'galaxies') {
@@ -352,7 +268,7 @@ export const MindMap = () => {
     
     setViewMode('galaxies');
     setCurrentGalaxy(null);
-    setNodes(initialGalaxies);
+    setNodes(galaxies);
     setEdges([]);
     setLinkingMode(false);
     setLinkingFrom(null);
@@ -360,18 +276,20 @@ export const MindMap = () => {
       title: "Zoomed Out",
       description: "Now viewing all galaxies.",
     });
-  }, [setNodes, setEdges, currentGalaxy, edges, toast]);
+  }, [setNodes, setEdges, currentGalaxy, edges, galaxies, toast]);
 
   const handleSearch = useCallback((query: string) => {
     const results: any[] = [];
     
     // Search through all galaxy notes
     Object.entries(galaxyNotes).forEach(([galaxyId, notes]) => {
-      const galaxyName = initialGalaxies.find(g => g.id === galaxyId)?.data.name || 'Unknown';
+      const galaxyName = galaxies.find(g => g.id === galaxyId)?.data.name || 'Unknown';
       notes.forEach(note => {
+        const title = String(note.data.title || '');
+        const content = String(note.data.content || '');
         if (
-          note.data.title.toLowerCase().includes(query.toLowerCase()) ||
-          note.data.content.toLowerCase().includes(query.toLowerCase())
+          title.toLowerCase().includes(query.toLowerCase()) ||
+          content.toLowerCase().includes(query.toLowerCase())
         ) {
           results.push({
             id: note.id,
@@ -386,7 +304,7 @@ export const MindMap = () => {
     });
     
     return results;
-  }, []);
+  }, [galaxyNotes, galaxies]);
 
   const navigateToNote = useCallback((noteId: string) => {
     const result = handleSearch('').find(r => r.id === noteId);
@@ -496,7 +414,7 @@ export const MindMap = () => {
               <br />
               {viewMode === 'galaxies' 
                 ? 'Click galaxies to explore • Search to find notes'
-                : `${currentGalaxy ? initialGalaxies.find(g => g.id === currentGalaxy)?.data.name : 'Notes'} Galaxy • Hover notes for actions • Link mode: ${linkingMode ? 'ON' : 'OFF'}`
+                : `${currentGalaxy ? galaxies.find(g => g.id === currentGalaxy)?.data.name : 'Notes'} Galaxy • Hover notes for actions • Link mode: ${linkingMode ? 'ON' : 'OFF'}`
               }
             </p>
           </div>

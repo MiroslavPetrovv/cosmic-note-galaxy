@@ -1,8 +1,9 @@
 import React from 'react';
-import { Plus, Trash2, Sparkles, ArrowLeft, X } from 'lucide-react';
+import { Plus, Trash2, Sparkles, ArrowLeft, X, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { getLastSavedTime } from '@/hooks/useAutoSave';
 
 interface ToolbarProps {
   onAddNote: () => void;
@@ -82,6 +83,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             Linking Mode
           </Badge>
         )}
+        
+        <div className="flex items-center gap-1 text-muted-foreground">
+          <Save className="h-3 w-3" />
+          <span className="text-xs">Auto-save</span>
+        </div>
       </div>
     </Card>
   );
